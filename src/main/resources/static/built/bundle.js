@@ -53792,7 +53792,6 @@ var App = /*#__PURE__*/function (_React$Component) {
     });
 
     _defineProperty(_assertThisInitialized(_this), "onCreate", function (newInvention) {
-      console.log(newInvention);
       fetch("/api/inventions", {
         method: "POST",
         body: JSON.stringify(newInvention),

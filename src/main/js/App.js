@@ -30,7 +30,6 @@ class App extends React.Component {
   };
 
   onCreate = (newInvention) => {
-    console.log(newInvention);
     fetch("/api/inventions", {
       method: "POST",
       body: JSON.stringify(newInvention),
