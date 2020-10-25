@@ -20,15 +20,16 @@ public class DatabaseLoader implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            Invention[] inventions = mapper.readValue(Paths.get("inventions.json").toFile(), Invention[].class);
-            for (Invention invention : inventions) {
-                inventionRepository.save(invention);
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        // For testing purposes
+        // try {
+        //     ObjectMapper mapper = new ObjectMapper();
+        //     Invention[] inventions = mapper.readValue(Paths.get("inventions.json").toFile(), Invention[].class);
+        //     for (Invention invention : inventions) {
+        //         inventionRepository.save(invention);
+        //     }
+        // } catch (Exception ex) {
+        //     ex.printStackTrace();
+        // }
     }
 
 }
