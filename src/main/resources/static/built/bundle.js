@@ -4850,6 +4850,144 @@ module.exports = invariant;
 
 /***/ }),
 
+/***/ "./node_modules/jscookie/cookie.js":
+/*!*****************************************!*\
+  !*** ./node_modules/jscookie/cookie.js ***!
+  \*****************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+/**
+ * @author DaveDevor davedevor@gmail.com
+ */
+
+/**
+ * Cookie Object with set, get, and del methods.
+ * @type  {Object}
+ */
+var cookie = {
+
+	/**
+	 * Set a cookie
+	 * @param  {Object}  options
+	 * @param  {String}  options.name    * name or key of the cookie
+	 * @param  {String}  options.value   value of the cookie
+	 * @param  {Number}  options.exdays  how many days until the cookie expires
+	 * @param  {String}  options.path    path of cookie
+	 * @param  {String}  options.domain  domain of cookie
+	 */
+	set: function(options) {
+		options.name   = options.name   || false;
+		options.value  = options.value  || '';
+		options.exdays = options.exdays || false;
+		options.path   = options.path   || '/';
+		options.domain = options.domain || false;
+
+		if (options.name) {
+			var domain  = options.domain ? 'domain=' + options.domain + ';' : '';
+			var path    = 'path=' + options.path;
+			var expires = '';
+
+			// create the expiration date
+			if (options.exdays) {
+				var d = new Date();
+
+				d.setTime( d.getTime() + (options.exdays * 24 * 60 * 60 * 1000));
+				expires = "expires=" + d.toUTCString();
+			}
+
+			document.cookie = options.name + "=" + options.value + ";" + domain + path + ';' + expires;
+
+			return true;
+		}
+
+		return false;
+	},
+
+	/**
+	 * Get a Cookies Value
+	 * @param   {String}  cname  name of cookie to retrieve
+	 *
+	 * @return  {String}         Returns the Value of the Cookie
+	 */
+	get: function(cname) {
+		var name        = cname + "=";
+		var arrCookie   = document.cookie.split(';');
+		var strCookie     = null;
+		var string        = null;
+
+		// Go through every cookie in the array
+		for(var i = 0; i < arrCookie.length; i++) {
+			strCookie = arrCookie[i];
+
+			// trim spaces
+			while (strCookie.charAt(0) === ' ') {
+				strCookie = strCookie.substring(1);
+			}
+
+			// if this cookie matches the name we are trying to retreive - found it.
+			if (strCookie.indexOf(name) === 0) {
+				// get the value
+				string = strCookie.substring(name.length, strCookie.length);
+
+				// If this is a string of an object, convert it to an object
+				if (string.split('&').length > 1) {
+					return _stringToObject(string);
+
+				}
+
+				// return the value
+				return string;
+			}
+		}
+
+		// never found cookie
+		return false;
+	},
+
+	/**
+	 * Delete a cookie by key
+	 * @param   {String}  name   string of cookie name
+	 *
+	 * @return  {Boolean}        success
+	 */
+	del: function (name) {
+		name = name || false;
+		var isDeleted = cookie.set({
+			name   : name,
+			value  : null,
+			exdays : -1,
+			path   : null,
+			domain : null
+		});
+
+		return isDeleted;
+	}
+};
+
+
+function _stringToObject(string) {
+	var strArray   = string.split('&');
+	var stringObj  = {};
+	var propValArray = null;
+
+	for (var i = 0; i < strArray.length; i++) {
+		propValArray = strArray[i].split('=');
+
+		if (propValArray.length > 1) {
+			stringObj[propValArray[0]] = propValArray[1];
+		}
+	}
+
+	return stringObj;
+}
+
+
+module.exports = cookie;
+
+
+/***/ }),
+
 /***/ "./node_modules/lodash.once/index.js":
 /*!*******************************************!*\
   !*** ./node_modules/lodash.once/index.js ***!
@@ -53590,6 +53728,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _components_BirthdayInput__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./components/BirthdayInput */ "./src/main/js/components/BirthdayInput.js");
 /* harmony import */ var _components_InventionList__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./components/InventionList */ "./src/main/js/components/InventionList.js");
 /* harmony import */ var _components_MyNavbar__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./components/MyNavbar */ "./src/main/js/components/MyNavbar.js");
+/* harmony import */ var jscookie__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! jscookie */ "./node_modules/jscookie/cookie.js");
+/* harmony import */ var jscookie__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(jscookie__WEBPACK_IMPORTED_MODULE_7__);
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -53622,6 +53762,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 
 
+
 var App = /*#__PURE__*/function (_React$Component) {
   _inherits(App, _React$Component);
 
@@ -53640,6 +53781,47 @@ var App = /*#__PURE__*/function (_React$Component) {
       });
     });
 
+    _defineProperty(_assertThisInitialized(_this), "loadFromServer", function () {
+      fetch("/api/inventions").then(function (response) {
+        return response.json();
+      }).then(function (json) {
+        _this.setState({
+          inventions: json._embedded.inventions
+        });
+      });
+    });
+
+    _defineProperty(_assertThisInitialized(_this), "onCreate", function (newInvention) {
+      console.log(newInvention);
+      fetch("/api/inventions", {
+        method: "POST",
+        body: JSON.stringify(newInvention),
+        headers: {
+          "Content-Type": "application/json",
+          "X-XSRF-TOKEN": jscookie__WEBPACK_IMPORTED_MODULE_7___default.a.get("XSRF-TOKEN")
+        }
+      }).then(function (response) {
+        if (response.status == 201) {
+          _this.loadFromServer();
+        }
+      });
+    });
+
+    _defineProperty(_assertThisInitialized(_this), "onDelete", function (invention) {
+      fetch(invention._links.self.href, {
+        method: "DELETE",
+        headers: {
+          "X-XSRF-TOKEN": jscookie__WEBPACK_IMPORTED_MODULE_7___default.a.get("XSRF-TOKEN")
+        }
+      }).then(function (response) {
+        if (response.status == 204) {
+          _this.loadFromServer();
+        } else {
+          alert(response);
+        }
+      });
+    });
+
     _this.state = {
       inventions: [],
       birthday: new Date()
@@ -53650,23 +53832,18 @@ var App = /*#__PURE__*/function (_React$Component) {
   _createClass(App, [{
     key: "componentDidMount",
     value: function componentDidMount() {
-      var _this2 = this;
-
-      fetch("/api/inventions").then(function (response) {
-        return response.json();
-      }).then(function (json) {
-        _this2.setState({
-          inventions: json._embedded.inventions
-        });
-      });
+      this.loadFromServer();
     }
   }, {
     key: "render",
     value: function render() {
-      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(_components_MyNavbar__WEBPACK_IMPORTED_MODULE_6__["default"], null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(react_bootstrap__WEBPACK_IMPORTED_MODULE_2__["Container"], null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(_components_BirthdayInput__WEBPACK_IMPORTED_MODULE_4__["default"], {
+      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(_components_MyNavbar__WEBPACK_IMPORTED_MODULE_6__["default"], {
+        onCreate: this.onCreate
+      }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(react_bootstrap__WEBPACK_IMPORTED_MODULE_2__["Container"], null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(_components_BirthdayInput__WEBPACK_IMPORTED_MODULE_4__["default"], {
         setBirthday: this.setBirthday,
         birthday: this.state.birthday
       }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(_components_InventionList__WEBPACK_IMPORTED_MODULE_5__["default"], {
+        onDelete: this.onDelete,
         inventions: this.state.inventions,
         birthday: this.state.birthday
       })));
@@ -53797,16 +53974,28 @@ var Invention = /*#__PURE__*/function (_React$Component) {
   function Invention() {
     _classCallCheck(this, Invention);
 
-    return _super.apply(this, arguments);
+    return _super.call(this);
   }
 
   _createClass(Invention, [{
     key: "render",
     value: function render() {
+      var _this = this;
+
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("tr", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, this.props.invention.name), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, this.props.invention.created), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("a", {
         target: "_blank",
         href: this.props.invention.src
-      }, this.props.invention.src)));
+      }, this.props.invention.src)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("img", {
+        onClick: function onClick() {
+          return _this.props.onDelete(_this.props.invention);
+        },
+        style: {
+          maxWidth: "5vw",
+          maxHeight: "5vh"
+        },
+        src: "/delete.png",
+        alt: "Edit"
+      })));
     }
   }]);
 
@@ -53868,7 +54057,11 @@ var InventionList = /*#__PURE__*/function (_React$Component) {
 
     _classCallCheck(this, InventionList);
 
-    _this = _super.call(this);
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    _this = _super.call.apply(_super, [this].concat(args));
 
     _defineProperty(_assertThisInitialized(_this), "isBeforeDate", function (date) {
       return Date.parse(date) > _this.props.birthday;
@@ -53886,15 +54079,16 @@ var InventionList = /*#__PURE__*/function (_React$Component) {
         return _this2.isBeforeDate(invention.created);
       }).map(function (invention) {
         return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_Invention__WEBPACK_IMPORTED_MODULE_2__["default"], {
-          key: invention.name,
-          invention: invention
+          key: invention.id,
+          invention: invention,
+          onDelete: _this2.props.onDelete
         });
       });
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_bootstrap__WEBPACK_IMPORTED_MODULE_1__["Table"], {
         striped: true,
         bordered: true,
         hover: true
-      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("thead", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("tr", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("th", null, "Invention"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("th", null, "Created"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("th", null, "Source"))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("tbody", null, inventions));
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("thead", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("tr", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("th", null, "Invention"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("th", null, "Created"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("th", null, "Source"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("th", null, "Delete"))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("tbody", null, inventions));
     }
   }]);
 
@@ -53917,6 +54111,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/index.js");
+/* harmony import */ var jscookie__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! jscookie */ "./node_modules/jscookie/cookie.js");
+/* harmony import */ var jscookie__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(jscookie__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _crud_CreateDialog__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./crud/CreateDialog */ "./src/main/js/components/crud/CreateDialog.js");
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -53939,6 +54136,10 @@ function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Re
 
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+
+
 
 
 
@@ -53948,14 +54149,87 @@ var MyNavbar = /*#__PURE__*/function (_React$Component) {
   var _super = _createSuper(MyNavbar);
 
   function MyNavbar() {
+    var _this;
+
     _classCallCheck(this, MyNavbar);
 
-    return _super.apply(this, arguments);
+    _this = _super.call(this);
+
+    _defineProperty(_assertThisInitialized(_this), "getUsername", function () {
+      return fetch("/auth/user").then(function (response) {
+        return response.json();
+      }).then(function (json) {
+        if (json.name) _this.setState({
+          username: json.name
+        });
+      });
+    });
+
+    _defineProperty(_assertThisInitialized(_this), "logout", function () {
+      fetch("/logout", {
+        method: "POST",
+        headers: {
+          "X-XSRF-TOKEN": jscookie__WEBPACK_IMPORTED_MODULE_2___default.a.get("XSRF-TOKEN")
+        }
+      }).then(function (response) {
+        if (response.status == 200) {
+          _this.setState({
+            username: ""
+          });
+        } else {
+          alert("error");
+        }
+      });
+    });
+
+    _defineProperty(_assertThisInitialized(_this), "onHide", function () {
+      _this.setState({
+        modalShow: false
+      });
+    });
+
+    _this.state = {
+      username: "",
+      modalShow: false
+    };
+    return _this;
   }
 
   _createClass(MyNavbar, [{
+    key: "componentDidMount",
+    value: function componentDidMount() {
+      this.getUsername();
+    }
+  }, {
     key: "render",
     value: function render() {
+      var _this2 = this;
+
+      var authButtons;
+      var addInventionButton;
+
+      if (this.state.username.length > 0) {
+        authButtons = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null, "Signed in as: ", this.state.username), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_bootstrap__WEBPACK_IMPORTED_MODULE_1__["Button"], {
+          variant: "outline-success",
+          onClick: function onClick() {
+            return _this2.logout();
+          }
+        }, "Logout"));
+        addInventionButton = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_bootstrap__WEBPACK_IMPORTED_MODULE_1__["Button"], {
+          variant: "outline-success",
+          onClick: function onClick() {
+            return _this2.setState({
+              modalShow: true
+            });
+          }
+        }, "Add invention");
+      } else {
+        authButtons = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_bootstrap__WEBPACK_IMPORTED_MODULE_1__["Button"], {
+          variant: "outline-success",
+          href: "/oauth2/authorization/github"
+        }, "Login");
+      }
+
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_bootstrap__WEBPACK_IMPORTED_MODULE_1__["Navbar"], {
         bg: "light",
         expand: "lg"
@@ -53967,7 +54241,13 @@ var MyNavbar = /*#__PURE__*/function (_React$Component) {
         id: "basic-navbar-nav"
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_bootstrap__WEBPACK_IMPORTED_MODULE_1__["Nav"], {
         className: "mr-auto"
-      })));
+      }, addInventionButton), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_bootstrap__WEBPACK_IMPORTED_MODULE_1__["Form"], {
+        inline: true
+      }, authButtons)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_crud_CreateDialog__WEBPACK_IMPORTED_MODULE_3__["default"], {
+        modalShow: this.state.modalShow,
+        onHide: this.onHide,
+        onCreate: this.props.onCreate
+      }));
     }
   }]);
 
@@ -53975,6 +54255,149 @@ var MyNavbar = /*#__PURE__*/function (_React$Component) {
 }(react__WEBPACK_IMPORTED_MODULE_0___default.a.Component);
 
 /* harmony default export */ __webpack_exports__["default"] = (MyNavbar);
+
+/***/ }),
+
+/***/ "./src/main/js/components/crud/CreateDialog.js":
+/*!*****************************************************!*\
+  !*** ./src/main/js/components/crud/CreateDialog.js ***!
+  \*****************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/index.js");
+/* harmony import */ var react_date_picker__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react-date-picker */ "./node_modules/react-date-picker/dist/entry.js");
+/* harmony import */ var react_date_picker__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(react_date_picker__WEBPACK_IMPORTED_MODULE_2__);
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+
+
+
+
+var CreateDialog = /*#__PURE__*/function (_React$Component) {
+  _inherits(CreateDialog, _React$Component);
+
+  var _super = _createSuper(CreateDialog);
+
+  function CreateDialog() {
+    var _this;
+
+    _classCallCheck(this, CreateDialog);
+
+    _this = _super.call(this);
+
+    _defineProperty(_assertThisInitialized(_this), "updateName", function (e) {
+      _this.setState({
+        name: e.target.value
+      });
+    });
+
+    _defineProperty(_assertThisInitialized(_this), "updateCreated", function (date) {
+      _this.setState({
+        created: date
+      });
+    });
+
+    _defineProperty(_assertThisInitialized(_this), "updateSrc", function (e) {
+      _this.setState({
+        src: e.target.value
+      });
+    });
+
+    _this.state = {
+      name: "Invention name",
+      created: new Date(),
+      src: "Source of information"
+    };
+    return _this;
+  }
+
+  _createClass(CreateDialog, [{
+    key: "render",
+    value: function render() {
+      var _this2 = this;
+
+      var inputStyle = {
+        marginTop: "3vh",
+        marginBottom: "3vh"
+      };
+      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_bootstrap__WEBPACK_IMPORTED_MODULE_1__["Modal"], {
+        show: this.props.modalShow,
+        onHide: this.props.onHide,
+        size: "lg",
+        "aria-labelledby": "contained-modal-title-vcenter",
+        centered: true
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_bootstrap__WEBPACK_IMPORTED_MODULE_1__["Modal"].Header, {
+        closeButton: true
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_bootstrap__WEBPACK_IMPORTED_MODULE_1__["Modal"].Title, {
+        id: "contained-modal-title-vcenter"
+      }, "Add an invention")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_bootstrap__WEBPACK_IMPORTED_MODULE_1__["Modal"].Body, {
+        style: {
+          textAlign: "center"
+        }
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_bootstrap__WEBPACK_IMPORTED_MODULE_1__["Form"].Control, {
+        style: inputStyle,
+        onChange: function onChange(e) {
+          return _this2.updateName(e);
+        },
+        type: "text",
+        placeholder: "Invention name"
+      }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_date_picker__WEBPACK_IMPORTED_MODULE_2___default.a, {
+        style: inputStyle,
+        value: this.state.created,
+        onChange: function onChange(date) {
+          return _this2.updateCreated(date);
+        }
+      }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_bootstrap__WEBPACK_IMPORTED_MODULE_1__["Form"].Control, {
+        style: inputStyle,
+        onChange: function onChange(e) {
+          return _this2.updateSrc(e);
+        },
+        type: "text",
+        placeholder: "Source of information must be a valid URL"
+      }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_bootstrap__WEBPACK_IMPORTED_MODULE_1__["Button"], {
+        variant: "outline-success",
+        onClick: function onClick() {
+          _this2.props.onCreate(_this2.state);
+
+          _this2.props.onHide();
+        }
+      }, "Add invention")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_bootstrap__WEBPACK_IMPORTED_MODULE_1__["Modal"].Footer, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_bootstrap__WEBPACK_IMPORTED_MODULE_1__["Button"], {
+        onClick: this.props.onHide
+      }, "Close")));
+    }
+  }]);
+
+  return CreateDialog;
+}(react__WEBPACK_IMPORTED_MODULE_0___default.a.Component);
+
+/* harmony default export */ __webpack_exports__["default"] = (CreateDialog);
 
 /***/ })
 

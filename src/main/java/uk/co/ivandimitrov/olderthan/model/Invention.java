@@ -4,6 +4,7 @@ import java.net.URL;
 import java.time.LocalDate;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -21,13 +22,15 @@ import lombok.Setter;
 @AllArgsConstructor
 public class Invention {
     @Id
-    private String Name;
+    @GeneratedValue
+    private Long Id;
+    private String name;
     @JsonDeserialize(using = LocalDateDeserializer.class)
     private LocalDate created;
     private URL src;
 
     @Override
     public String toString() {
-        return Name + " " + created + " " + src;
+        return name + " " + created + " " + src;
     }
 }

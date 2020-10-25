@@ -3,10 +3,6 @@ import { Table } from "react-bootstrap";
 import Invention from "./Invention";
 
 class InventionList extends React.Component {
-  constructor() {
-    super();
-  }
-
   isBeforeDate = (date) => {
     return Date.parse(date) > this.props.birthday;
   };
@@ -15,7 +11,13 @@ class InventionList extends React.Component {
     let inventions = this.props.inventions
       .filter((invention) => this.isBeforeDate(invention.created))
       .map((invention) => {
-        return <Invention key={invention.name} invention={invention} />;
+        return (
+          <Invention
+            key={invention.id}
+            invention={invention}
+            onDelete={this.props.onDelete}
+          />
+        );
       });
     return (
       <Table striped bordered hover>
@@ -24,6 +26,7 @@ class InventionList extends React.Component {
             <th>Invention</th>
             <th>Created</th>
             <th>Source</th>
+            <th>Delete</th>
           </tr>
         </thead>
         <tbody>{inventions}</tbody>
