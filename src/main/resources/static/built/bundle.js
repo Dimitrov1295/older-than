@@ -54155,33 +54155,6 @@ var MyNavbar = /*#__PURE__*/function (_React$Component) {
 
     _this = _super.call(this);
 
-    _defineProperty(_assertThisInitialized(_this), "getUsername", function () {
-      return fetch("/auth/user").then(function (response) {
-        return response.json();
-      }).then(function (json) {
-        if (json.name) _this.setState({
-          username: json.name
-        });
-      });
-    });
-
-    _defineProperty(_assertThisInitialized(_this), "logout", function () {
-      fetch("/logout", {
-        method: "POST",
-        headers: {
-          "X-XSRF-TOKEN": jscookie__WEBPACK_IMPORTED_MODULE_2___default.a.get("XSRF-TOKEN")
-        }
-      }).then(function (response) {
-        if (response.status == 200) {
-          _this.setState({
-            username: ""
-          });
-        } else {
-          alert("error");
-        }
-      });
-    });
-
     _defineProperty(_assertThisInitialized(_this), "onHide", function () {
       _this.setState({
         modalShow: false
@@ -54189,47 +54162,24 @@ var MyNavbar = /*#__PURE__*/function (_React$Component) {
     });
 
     _this.state = {
-      username: "",
       modalShow: false
     };
     return _this;
   }
 
   _createClass(MyNavbar, [{
-    key: "componentDidMount",
-    value: function componentDidMount() {
-      this.getUsername();
-    }
-  }, {
     key: "render",
     value: function render() {
       var _this2 = this;
 
-      var authButtons;
-      var addInventionButton;
-
-      if (this.state.username.length > 0) {
-        authButtons = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null, "Signed in as: ", this.state.username), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_bootstrap__WEBPACK_IMPORTED_MODULE_1__["Button"], {
-          variant: "outline-success",
-          onClick: function onClick() {
-            return _this2.logout();
-          }
-        }, "Logout"));
-        addInventionButton = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_bootstrap__WEBPACK_IMPORTED_MODULE_1__["Button"], {
-          variant: "outline-success",
-          onClick: function onClick() {
-            return _this2.setState({
-              modalShow: true
-            });
-          }
-        }, "Add invention");
-      } else {
-        authButtons = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_bootstrap__WEBPACK_IMPORTED_MODULE_1__["Button"], {
-          variant: "outline-success",
-          href: "/oauth2/authorization/github"
-        }, "Login");
-      }
-
+      var addInventionButton = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_bootstrap__WEBPACK_IMPORTED_MODULE_1__["Button"], {
+        variant: "outline-success",
+        onClick: function onClick() {
+          return _this2.setState({
+            modalShow: true
+          });
+        }
+      }, "Add invention");
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_bootstrap__WEBPACK_IMPORTED_MODULE_1__["Navbar"], {
         bg: "light",
         expand: "lg"
@@ -54241,9 +54191,7 @@ var MyNavbar = /*#__PURE__*/function (_React$Component) {
         id: "basic-navbar-nav"
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_bootstrap__WEBPACK_IMPORTED_MODULE_1__["Nav"], {
         className: "mr-auto"
-      }, addInventionButton), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_bootstrap__WEBPACK_IMPORTED_MODULE_1__["Form"], {
-        inline: true
-      }, authButtons)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_crud_CreateDialog__WEBPACK_IMPORTED_MODULE_3__["default"], {
+      }, addInventionButton)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_crud_CreateDialog__WEBPACK_IMPORTED_MODULE_3__["default"], {
         modalShow: this.state.modalShow,
         onHide: this.onHide,
         onCreate: this.props.onCreate
